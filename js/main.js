@@ -109,3 +109,10 @@ loginSignup.addEventListener('click', event => {
     setUsers.signUp(emailInput.value, passwordInput.value, toggleAuthDom);
 });
 toggleAuthDom();
+
+
+//ДЗ при добавлении
+email=superBoss@emailInput.ru
+password:123423
+name:superBoss//чтобы в name сохранялся mail
+//1. написать функцию, чтобы не пропускало без .ru/.com
