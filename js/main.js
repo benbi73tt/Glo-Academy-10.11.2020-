@@ -20,7 +20,7 @@ const loginSignup = document.querySelector('.login-signup');
 const userElem = document.querySelector('.user');
 const userNameElem = document.querySelector('.user-name');
 
-
+// временная база данных пользователей
 const listUsers = [{
         id: '01',
         email: 'maks@mail.ru',
@@ -34,6 +34,8 @@ const listUsers = [{
         displayName: 'KateKillMaks'
     }
 ];
+
+// работает с авторизацией
 const setUsers = {
     user: null,
     logIn(email, password, handler) {
@@ -49,13 +51,16 @@ const setUsers = {
     logOut() {
         console.log('logOut'); //выход
     },
-    signUp(email, password, handler) {
+    signUp(email, password, handler) { //регистрация
         if (!this.getUser(email)) {
             const user = {
                 email,
                 password,
-                displayName: email
+                displayName: email.split('@')[0],
+                mail: email.split('@')[1]
             }
+            if (typeof mail === 'undefined' || email.indexOf('@') && mail.indexOf('.') < 0)
+                return alert('Неправильно задан логин');
             listUsers.push(user);
             this.authorizedUser(user)
             handler();
@@ -63,6 +68,8 @@ const setUsers = {
             alert('Пользователь с таким email уже зареган');
         }
     },
+
+    // получаем конкретного пользователя по его email
     getUser(email) {
         return listUsers.find(item => item.email === email); //,i,arr)//элемент,индекс,сам массив
     },
@@ -79,6 +86,7 @@ const setUsers = {
     }
 };
 
+// переключает форму авторизации
 const toggleAuthDom = () => {
     const user = setUsers.user;
     console.log('user:', user);
@@ -94,7 +102,7 @@ const toggleAuthDom = () => {
     }
 };
 
-
+// обработчик события отправки данных формы
 loginForm.addEventListener('submit', event => {
     event.preventDefault();
 
@@ -104,15 +112,19 @@ loginForm.addEventListener('submit', event => {
     setUsers.logIn(emailInput.value, passwordInput.value, toggleAuthDom);
 
 });
+
+// эобработчик нажатия на кнопку регистрации
 loginSignup.addEventListener('click', event => {
     event.preventDefault();
     setUsers.signUp(emailInput.value, passwordInput.value, toggleAuthDom);
 });
+
+// вызываем проверку авторизованности
 toggleAuthDom();
 
 
 //ДЗ при добавлении
-email=superBoss@emailInput.ru
-password:123423
-name:superBoss//чтобы в name сохранялся mail
+// email:superBoss@emailInput.ru
+// password:123423
+// name:superBoss//чтобы в name сохранялся mail
 //1. написать функцию, чтобы не пропускало без .ru/.com
