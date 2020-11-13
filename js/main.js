@@ -1,222 +1,274 @@
-// Создаем переменную, в которую положим кнопку меню
-let menuToggle = document.querySelector('#menu-toggle');
-// Создаем переменную, в которую положим меню
-let menu = document.querySelector('.sidebar');
+ // Your web app's Firebase configuration
+ const firebaseConfig = {
+     apiKey: "AIzaSyB-ce-Ud4M-sRzdjwmakuWLjfA97ykOYzU",
+     authDomain: "pikady-71e9a.firebaseapp.com",
+     databaseURL: "https://pikady-71e9a.firebaseio.com",
+     projectId: "pikady-71e9a",
+     storageBucket: "pikady-71e9a.appspot.com",
+     messagingSenderId: "276367910867",
+     appId: "1:276367910867:web:da0f12beb65e1e6358b126"
+ };
+ // Initialize Firebase
+ firebase.initializeApp(firebaseConfig);
+
+ // Создаем переменную, в которую положим кнопку меню
+ let menuToggle = document.querySelector('#menu-toggle');
+ // Создаем переменную, в которую положим меню
+ let menu = document.querySelector('.sidebar');
 
 
-//w+ - до собаки W+\.\w{2,} 2 знака минимум
-const regExpValEmail = /^\w+@\w+\.\w{2,}$/; //для учитывания почты в нормальном виде(с точками)
+ //w+ - до собаки W+\.\w{2,} 2 знака минимум
+ const regExpValEmail = /^\w+@\w+\.\w{2,}$/; //для учитывания почты в нормальном виде(с точками)
 
-const loginElem = document.querySelector('.login');
-const loginForm = document.querySelector('.login-form');
-const emailInput = document.querySelector('.login-email');
-const passwordInput = document.querySelector('.login-password');
-const loginSignup = document.querySelector('.login-signup');
+ const loginElem = document.querySelector('.login');
+ const loginForm = document.querySelector('.login-form');
+ const emailInput = document.querySelector('.login-email');
+ const passwordInput = document.querySelector('.login-password');
+ const loginSignup = document.querySelector('.login-signup');
 
-const userElem = document.querySelector('.user');
-const userNameElem = document.querySelector('.user-name');
+ const userElem = document.querySelector('.user');
+ const userNameElem = document.querySelector('.user-name');
 
-const exitElem = document.querySelector('.exit');
-const editElem = document.querySelector('.edit');
-const editContainer = document.querySelector('.edit-container');
+ const exitElem = document.querySelector('.exit');
+ const editElem = document.querySelector('.edit');
+ const editContainer = document.querySelector('.edit-container');
 
-const editUsername = document.querySelector('.edit-username');
-const editPhotoURL = document.querySelector('.edit-photo');
-const userAvatarElem = document.querySelector('.user-avatar');
+ const editUsername = document.querySelector('.edit-username');
+ const editPhotoURL = document.querySelector('.edit-photo');
+ const userAvatarElem = document.querySelector('.user-avatar');
 
-const postsWrapper = document.querySelector(".posts");
+ const postsWrapper = document.querySelector(".posts");
 
-const buttonNewPost = document.querySelector('.button-new-post'); //отеление поста
+ const buttonNewPost = document.querySelector('.button-new-post'); //отеление поста
 
-const addPostElem = document.querySelector('.add-post');
+ const addPostElem = document.querySelector('.add-post');
 
-
-
-// временная база данных пользователей
-const listUsers = [{
-        id: '01',
-        email: 'maks@mail.ru',
-        password: '12345',
-        displayName: 'MaksJs',
-        mail: 'mail.ru',
-        photo: 'https://kartinkinaden.ru/uploads/posts/2019-08/1566470359_art-demonessa-53.jpg'
-    },
-    {
-        id: '02',
-        email: 'kate@mail.ru',
-        password: '123457',
-        displayName: 'KateKillMaks',
-        mail: 'mail.ru',
-        photo: 'https://kartinkinaden.ru/uploads/posts/2019-08/1566470359_art-demonessa-53.jpg'
-    }
-];
-
-// работает с авторизацией
-const setUsers = {
-    user: null,
-    logIn(email, password, handler) {
-        if (!regExpValEmail.test(email)) {
-            alert('email не валиден');
-            return;
-        }
-        const user = this.getUser(email);
-        if (user && user.password === password) {
-            this.authorizedUser(user)
-            handler();
-        } else {
-            alert('пользователь с такими данными не найден');
-        }
-
-    },
-    logOut(handler) { //выход
-        this.user = null;
-        handler();
-    },
-    signUp(email, password, handler) { //регистрация
-        if (!regExpValEmail.test(email)) {
-            alert('email не валиден');
-            return;
-        }
-
-        if (!email.trim() || !password.trim()) { //проверка введен ли пароль или email
-            alert('введите данные'); //trim убирает пробелы слева и справа
-            return;
-        }
-
-        if (!this.getUser(email)) {
-            const user = {
-                email,
-                password,
-                displayName: email.split('@')[0],
-                mail: email.split('@')[1],
-            };
-            if (typeof user.mail === 'undefined' || user.mail.indexOf('.') == -1) {
-                return alert('Неправильно задан логин');
-            }
-            listUsers.push(user);
-            this.authorizedUser(user)
-            handler();
-        } else {
-            alert('Пользователь с таким email уже зареган');
-        }
-    },
-    editUser(userName, userPhoto, handler) {
-        if (userName) {
-            this.user.displayName = userName;
-        }
-        if (userPhoto) {
-            this.user.photo = userPhoto;
-        }
-        handler();
-    },
-
-    // получаем конкретного пользователя по его email
-    getUser(email) {
-        return listUsers.find(item => item.email === email); //,i,arr)//элемент,индекс,сам массив
-    },
-    // let user=null;
-    // for(let i=0;i<listUsers,length;i++){
-    //   if(listUsers[i].email===email){
-    //     user=listUsers[i];
-    //   }
-    // }
-    // return user;
-    //}
-    authorizedUser(user) {
-        this.user = user;
-    }
-};
-
-//методы чтобы добавлять посты
-const setPosts = {
-    allPosts: [{
-            title: "Заголовок1",
-            text: 'Далеко-далеко за словесными горами в стране гласных и согласных живут рыбные тексты. Языком что рот маленький реторический вершину текстов обеспечивает гор свой назад решила сбить маленькая дорогу жизни рукопись ему букв деревни предложения,ручеек залетают продолжил парадигматическая? Но языком сих пустился, запятой своего его снова решила меня вопроса моей своих пояс коварный, власти диких правилами напоивший они текстов ipsum первую подпоясал? Лучше, щеке подпоясал приставка большого курсивных на берегу своего? Злых, составитель агентство что вопроса ведущими о решила одна алфавит! ',
-            tags: ["свежее", "случайность"],
-            author: { displayName: 'bembi', photo: 'https://trikky.ru/wp-content/blogs.dir/1/files/2019/01/20/3e3e676badd77e23ee54c0d343c2fa28.jpg' },
-            date: '11.11.2010,16:54:00',
-            like: 15,
-            comments: 20,
-        }, {
-            title: "Заголовок2",
-            text: 'Про́за (лат. prōsa) — устная или письменная речь без деления на соизмеримые отрезки — стихи; в противоположность поэзии её ритм опирается на приблизительную соотнесенность синтаксических конструкций (периодов, предложений, колонов). Иногда термин употребляется в качестве противопоставления художественной литературы, вообще (поэзия) литературе научной или публицистической, то есть не относящейся к искусству[2].',
-            tags: ["свежее", "горячее", "мое", "случайность"],
-            author: { displayName: 'kate', photo: 'https://kartinkinaden.ru/uploads/posts/2019-08/1566470359_art-demonessa-53.jpg' },
-            date: '09.01.2015,12:45:00',
-            like: 145,
-            comments: 50,
-        },
-        {
-            title: "Заголовок3",
-            text: 'Далеко-далеко за словесными горами в стране гласных и согласных живут рыбные тексты. Языком что рот маленький реторический вершину текстов обеспечивает гор свой назад решила сбить маленькая дорогу жизни рукопись ему букв деревни предложения,ручеек залетают продолжил парадигматическая? Но языком сих пустился, запятой своего его снова решила меня вопроса моей своих пояс коварный, власти диких правилами напоивший они текстов ipsum первую подпоясал? Лучше, щеке подпоясал приставка большого курсивных на берегу своего? Злых, составитель агентство что вопроса ведущими о решила одна алфавит! ',
-            tags: ["свежее", "горячее", "мое", "случайность"],
-            author: { displayName: 'kate', photo: 'https://kartinkinaden.ru/uploads/posts/2019-08/1566470359_art-demonessa-53.jpg' },
-            date: '09.01.2015,12:45:00',
-            like: 115,
-            comments: 50,
-        },
+ const DEFAULT_PHOTO = userAvatarElem.src;
 
 
-    ],
-    addPost(title, text, tags, handler) {
-        this.allPosts.unshift({ //Добавляет пост в начало
-            title,
-            text,
-            tags: tags.split(',').map(item => item.trim()), //map убирает, trim убирает пробелы
-            author: {
-                displayName: setUsers.user.displayName,
-                photo: setUsers.user.photo,
-            },
-            date: new Date().toLocaleString(),
-            like: 0,
-            comments: 0,
-        });
-        if (handler) {
-            handler();
-        }
-    }
-};
+ // временная база данных пользователей
+ const listUsers = [{
+         id: '01',
+         email: 'maks@mail.ru',
+         password: '12345',
+         displayName: 'MaksJs',
+         mail: 'mail.ru',
+         photo: 'https://kartinkinaden.ru/uploads/posts/2019-08/1566470359_art-demonessa-53.jpg'
+     },
+     {
+         id: '02',
+         email: 'kate@mail.ru',
+         password: '123457',
+         displayName: 'KateKillMaks',
+         mail: 'mail.ru',
+         photo: 'https://kartinkinaden.ru/uploads/posts/2019-08/1566470359_art-demonessa-53.jpg'
+     }
+ ];
+
+ // работает с авторизацией
+ const setUsers = {
+     user: null,
+     initUser(handler) {
+         firebase.auth().onAuthStateChanged(user => {
+             if (user) {
+                 this.user = user;
+             } else {
+                 this.user = null;
+             }
+             if (handler) handler();
+         });
+     },
+     logIn(email, password, handler) {
+         if (!regExpValEmail.test(email)) {
+             alert('email не валиден');
+             return;
+         }
+
+         firebase.auth().signInWithEmailAndPassword(email, password)
+             .catch(err => {
+                 const errCode = err.code;
+                 const errMessage = err.message;
+                 if (errCode === 'auth/wrong-password') {
+                     console.log(errMessage);
+                     alert('Неверный пароль');
+                 } else if (errCode === 'auth/user-not-found') {
+                     console.log(errMessage);
+                     alert('Пользователь не найден');
+                 } else {
+                     alert(errMessage);
+                 }
+                 console.log(err);
+             }); //catch --провал
+
+         //  const user = this.getUser(email);
+         //  if (user && user.password === password) {
+         //      this.authorizedUser(user)
+         //      handler();
+         //  } else {
+         //      alert('пользователь с такими данными не найден');
+         //  }
+
+     },
+     logOut() { //выход
+         firebase.auth().signOut();
+         //  this.user = null;
+         //  handler();
+     },
+     signUp(email, password, handler) { //регистрация
+         if (!regExpValEmail.test(email)) {
+             alert('email не валиден');
+             return;
+         }
+
+         if (!email.trim() || !password.trim()) { //проверка введен ли пароль или email
+             alert('введите данные'); //trim убирает пробелы слева и справа
+             return;
+         }
+
+         //обещание что чтото случиться
+         firebase.auth().createUserWithEmailAndPassword(email, password)
+             .then(data => {
+                 console.log(data); //then -- успех
+             })
+             .catch(err => {
+                 const errCode = err.code;
+                 const errMessage = err.message;
+                 if (errCode === 'auth/weak-password') {
+                     console.log(errMessage);
+                     alert('Слабый пароль');
+                 } else if (errCode === 'auth/email-already-in-use') {
+                     console.log(errMessage);
+                     alert('Этот email уже используется');
+                 } else {
+                     alert(errMessage);
+                 }
+                 console.log(err);
+             }); //catch --провал
+         //  if (!this.getUser(email)) {
+         //      const user = {
+         //          email,
+         //          password,
+         //          displayName: email.split('@')[0],
+         //          mail: email.split('@')[1],
+         //      };
+         //      if (typeof user.mail === 'undefined' || user.mail.indexOf('.') == -1) {
+         //          return alert('Неправильно задан логин');
+         //      }
+         //      listUsers.push(user);
+         //      this.authorizedUser(user)
+         //      handler();
+         //  } else {
+         //      alert('Пользователь с таким email уже зареган');
+         //  }
+     },
+     editUser(displayName, PhotoURL, handler) {
+
+         const user = firebase.auth().currentUser;
+
+         if (displayName) {
+             if (PhotoURL) {
+                 user.updateProfile({
+                     displayName,
+                     photoURL
+                 }).then(handler)
+             } else {
+                 user.updateProfile({
+                     displayName
+                 }).then(handler)
+             }
+         }
+         handler();
+     },
+
+     // получаем конкретного пользователя по его email
+     getUser(email) {
+         return listUsers.find(item => item.email === email); //,i,arr)//элемент,индекс,сам массив
+     },
+     // let user=null;
+     // for(let i=0;i<listUsers,length;i++){
+     //   if(listUsers[i].email===email){
+     //     user=listUsers[i];
+     //   }
+     // }
+     // return user;
+     //}
+     authorizedUser(user) {
+         this.user = user;
+     }
+ };
+
+ //методы чтобы добавлять посты
+ const setPosts = {
+     allPosts: [],
+     addPost(title, text, tags, handler) {
+
+         const user = firebase.auth().currentUser;
 
 
-// переключает форму авторизации (handler)
-const toggleAuthDom = () => {
-    const user = setUsers.user;
-    console.log('user:', user);
-
-    if (user) { //только авторизованные пользователи
-        loginElem.style.display = 'none';
-        userElem.style.display = '';
-        userNameElem.textContent = user.displayName;
-        userAvatarElem.src = user.photo || userAvatarElem.src; //user.photo ? user.photo : userAvatarElem.src;
-        buttonNewPost.classList.add('visible');
-
-
-    } else {
-        loginElem.style.display = '';
-        userElem.style.display = 'none';
-        buttonNewPost.classList.remove('visible');
-        addPostElem.classList.remove('visible');
-        postsWrapper.classList.add('visible');
-    }
-};
-
-const showAddPost = () => {
-    addPostElem.classList.add('visible');
-    postsWrapper.classList.remove('visible');
-}
-
-const showAllPosts = () => {
+         this.allPosts.unshift({ //Добавляет пост в начало
+             id: `postID${+new Date().toString(16)}-${user,uid}`,
+             title,
+             text,
+             tags: tags.split(',').map(item => item.trim()), //map убирает, trim убирает пробелы
+             author: {
+                 displayName: setUsers.user.displayName,
+                 photo: setUsers.user.photoURL,
+             },
+             date: new Date().toLocaleString(),
+             like: 0,
+             comments: 0,
+         });
+         firebase.database().ref('post').set(this.allPosts)
+             .then(() => this.getPosts(handler));
+     },
+     getPosts(handler) {
+         firebase.database().ref('post').on('value', snapshot => {
+             this.allPosts = snapshot.val() || [];
+             handler();
+         })
+     }
+ };
 
 
-        let postsHTML = '';
+ // переключает форму авторизации (handler)
+ const toggleAuthDom = () => {
+     const user = setUsers.user;
+     console.log('user:', user);
 
-        setPosts.allPosts.forEach(({ title, text, date, author, tags, like, comments }) => {
-                    //дистриктуризация (ДОП)
-                    //!2:20 Досмотреть 2ой урок!!!!!!!!!!!!!!!
+     if (user) { //только авторизованные пользователи
+         loginElem.style.display = 'none';
+         userElem.style.display = '';
+         userNameElem.textContent = user.displayName;
+         userAvatarElem.src = user.photo || DEFAULT_PHOTO; //user.photo ? user.photo : userAvatarElem.src;
+         buttonNewPost.classList.add('visible');
 
 
-                    //интерпаляция
-                    postsHTML += `
+     } else {
+         loginElem.style.display = '';
+         userElem.style.display = 'none';
+         buttonNewPost.classList.remove('visible');
+         addPostElem.classList.remove('visible');
+         postsWrapper.classList.add('visible');
+     }
+ };
+
+ const showAddPost = () => {
+     addPostElem.classList.add('visible');
+     postsWrapper.classList.remove('visible');
+ }
+
+ const showAllPosts = () => {
+
+
+         let postsHTML = '';
+
+         setPosts.allPosts.forEach(({ title, text, date, author, tags, like, comments }) => {
+                     //дистриктуризация (ДОП)
+                     //!2:20 Досмотреть 2ой урок!!!!!!!!!!!!!!!
+
+
+                     //интерпаляция
+                     postsHTML += `
         <section class="post">
                 <div class="post-body">
                     <h2 class="post-title">${title}</h2>
@@ -294,7 +346,7 @@ const init = () => {
 
     exitElem.addEventListener('click', event => {
         event.preventDefault();
-        setUsers.logOut(toggleAuthDom);
+        setUsers.logOut();
     })
 
     editElem.addEventListener('click', event => {
@@ -342,9 +394,10 @@ const init = () => {
 
     });
 
-    showAllPosts();
+
+    setUsers.initUser(toggleAuthDom);
+    set.postsHTML(showAllPosts)
     // вызываем проверку авторизованности
-    toggleAuthDom();
 }
 
 document.addEventListener('DOMContentLoaded', init); //тоже самое что и ниже
