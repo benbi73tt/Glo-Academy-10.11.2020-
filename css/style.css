@@ -111,8 +111,23 @@ body {
     justify-content: space-between;
 }
 
+.add-post {
+    width: 67%;
+    display: none;
+    flex-direction: column;
+}
+
+.add-post.visible {
+    display: flex;
+}
+
 .posts {
     width: 67%;
+    display: none;
+}
+
+.posts.visible {
+    display: block;
 }
 
 .post {
@@ -151,8 +166,12 @@ body {
     color: #bfbfbf;
     font-size: 14px;
     line-height: 22px;
-    margin-right: 10px;
+    margin-left: 10px;
     text-decoration: none;
+}
+
+.tag:first-child {
+    margin-left: 0;
 }
 
 .post-footer {
@@ -460,6 +479,10 @@ login-signup:active {
     margin-top: 20px;
 }
 
+.button-new-post.visible {
+    display: flex;
+}
+
 .icon-fire {
     fill: #fff;
     width: 11px;
@@ -535,17 +558,14 @@ login-signup:active {
     color: #ffffff;
 }
 
-.add-post {
-    display: flex;
-    flex-direction: column;
-}
-
 .add-title,
-.add-text {
+.add-text,
+.add-tags {
     background: #ffffff;
     border: 1px solid #e8e8e8;
     padding: 23px 30px;
     margin-bottom: 16px;
+    resize: none;
 }
 
 .add-text {
@@ -644,6 +664,7 @@ login-signup:active {
     .author-avatar {
         margin-left: 0;
         margin-right: 10px;
+        object-fit: cover;
     }
     .author-about {
         order: 2;

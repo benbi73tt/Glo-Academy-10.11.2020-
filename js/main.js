@@ -26,20 +26,28 @@ const userAvatarElem = document.querySelector('.user-avatar');
 
 const postsWrapper = document.querySelector(".posts");
 
+const buttonNewPost = document.querySelector('.button-new-post'); //отеление поста
+
+const addPostElem = document.querySelector('.add-post');
+
+
+
 // временная база данных пользователей
 const listUsers = [{
         id: '01',
         email: 'maks@mail.ru',
         password: '12345',
         displayName: 'MaksJs',
-        mail: 'mail.ru'
+        mail: 'mail.ru',
+        photo: 'https://kartinkinaden.ru/uploads/posts/2019-08/1566470359_art-demonessa-53.jpg'
     },
     {
         id: '02',
         email: 'kate@mail.ru',
         password: '123457',
         displayName: 'KateKillMaks',
-        mail: 'mail.ru'
+        mail: 'mail.ru',
+        photo: 'https://kartinkinaden.ru/uploads/posts/2019-08/1566470359_art-demonessa-53.jpg'
     }
 ];
 
@@ -124,8 +132,8 @@ const setPosts = {
     allPosts: [{
             title: "Заголовок1",
             text: 'Далеко-далеко за словесными горами в стране гласных и согласных живут рыбные тексты. Языком что рот маленький реторический вершину текстов обеспечивает гор свой назад решила сбить маленькая дорогу жизни рукопись ему букв деревни предложения,ручеек залетают продолжил парадигматическая? Но языком сих пустился, запятой своего его снова решила меня вопроса моей своих пояс коварный, власти диких правилами напоивший они текстов ipsum первую подпоясал? Лучше, щеке подпоясал приставка большого курсивных на берегу своего? Злых, составитель агентство что вопроса ведущими о решила одна алфавит! ',
-            tags: ["свежее", "новое", "горячее", "мое", "случайность"],
-            author: 'maks@mail.ru',
+            tags: ["свежее", "случайность"],
+            author: { displayName: 'bembi', photo: 'https://trikky.ru/wp-content/blogs.dir/1/files/2019/01/20/3e3e676badd77e23ee54c0d343c2fa28.jpg' },
             date: '11.11.2010,16:54:00',
             like: 15,
             comments: 20,
@@ -133,7 +141,7 @@ const setPosts = {
             title: "Заголовок2",
             text: 'Про́за (лат. prōsa) — устная или письменная речь без деления на соизмеримые отрезки — стихи; в противоположность поэзии её ритм опирается на приблизительную соотнесенность синтаксических конструкций (периодов, предложений, колонов). Иногда термин употребляется в качестве противопоставления художественной литературы, вообще (поэзия) литературе научной или публицистической, то есть не относящейся к искусству[2].',
             tags: ["свежее", "горячее", "мое", "случайность"],
-            author: 'kate@mail.ru',
+            author: { displayName: 'kate', photo: 'https://kartinkinaden.ru/uploads/posts/2019-08/1566470359_art-demonessa-53.jpg' },
             date: '09.01.2015,12:45:00',
             like: 145,
             comments: 50,
@@ -142,14 +150,31 @@ const setPosts = {
             title: "Заголовок3",
             text: 'Далеко-далеко за словесными горами в стране гласных и согласных живут рыбные тексты. Языком что рот маленький реторический вершину текстов обеспечивает гор свой назад решила сбить маленькая дорогу жизни рукопись ему букв деревни предложения,ручеек залетают продолжил парадигматическая? Но языком сих пустился, запятой своего его снова решила меня вопроса моей своих пояс коварный, власти диких правилами напоивший они текстов ipsum первую подпоясал? Лучше, щеке подпоясал приставка большого курсивных на берегу своего? Злых, составитель агентство что вопроса ведущими о решила одна алфавит! ',
             tags: ["свежее", "горячее", "мое", "случайность"],
-            author: 'kate@mail.ru',
+            author: { displayName: 'kate', photo: 'https://kartinkinaden.ru/uploads/posts/2019-08/1566470359_art-demonessa-53.jpg' },
             date: '09.01.2015,12:45:00',
             like: 115,
             comments: 50,
+        },
+
+
+    ],
+    addPost(title, text, tags, handler) {
+        this.allPosts.unshift({ //Добавляет пост в начало
+            title,
+            text,
+            tags: tags.split(',').map(item => item.trim()), //map убирает, trim убирает пробелы
+            author: {
+                displayName: setUsers.user.displayName,
+                photo: setUsers.user.photo,
+            },
+            date: new Date().toLocaleString(),
+            like: 0,
+            comments: 0,
+        });
+        if (handler) {
+            handler();
         }
-
-
-    ]
+    }
 };
 
 
@@ -158,42 +183,46 @@ const toggleAuthDom = () => {
     const user = setUsers.user;
     console.log('user:', user);
 
-    if (user) {
+    if (user) { //только авторизованные пользователи
         loginElem.style.display = 'none';
         userElem.style.display = '';
         userNameElem.textContent = user.displayName;
         userAvatarElem.src = user.photo || userAvatarElem.src; //user.photo ? user.photo : userAvatarElem.src;
+        buttonNewPost.classList.add('visible');
+
+
     } else {
         loginElem.style.display = '';
         userElem.style.display = 'none';
-
+        buttonNewPost.classList.remove('visible');
+        addPostElem.classList.remove('visible');
+        postsWrapper.classList.add('visible');
     }
 };
 
-
+const showAddPost = () => {
+    addPostElem.classList.add('visible');
+    postsWrapper.classList.remove('visible');
+}
 
 const showAllPosts = () => {
 
-    let postsHTML = '';
 
-    setPosts.allPosts.forEach(post => {
-        //дистриктуризация (ДОП)
-        const { title, text, date } = post;
-        //!2:20 Досмотреть 2ой урок!!!!!!!!!!!!!!!
+        let postsHTML = '';
+
+        setPosts.allPosts.forEach(({ title, text, date, author, tags, like, comments }) => {
+                    //дистриктуризация (ДОП)
+                    //!2:20 Досмотреть 2ой урок!!!!!!!!!!!!!!!
 
 
-        //интерпаляция
-        postsHTML += `
+                    //интерпаляция
+                    postsHTML += `
         <section class="post">
                 <div class="post-body">
-                    <h2 class="post-title">${post.title}</h2>
-                    <p class="post-text">${post.text}</p>
+                    <h2 class="post-title">${title}</h2>
+                    <p class="post-text">${text}</p>
                     <div class="tags">
-                        <a href="#" class="tag">#свежее</a>
-                        <a href="#" class="tag">#новое</a>
-                        <a href="#" class="tag">#горячее</a>
-                        <a href="#" class="tag">#мое</a>
-                        <a href="#" class="tag">#случайность</a>
+                    ${tags.map(tag => `<a href="#" class="tag">#${tag}</a>`)}
                     </div>
                     <!-- /.tags -->
                 </div>
@@ -204,13 +233,13 @@ const showAllPosts = () => {
               <svg width="19" height="20" class="icon icon-like">
                 <use xlink:href="img/icons.svg#like"></use>
               </svg>
-              <span class="likes-counter">26</span>
+              <span class="likes-counter">${like}</span>
             </button>
                         <button class="post-button comments">
               <svg width="21" height="21" class="icon icon-comment">
                 <use xlink:href="img/icons.svg#comment"></use>
               </svg>
-              <span class="comments-counter">157</span>
+              <span class="comments-counter">${comments}</span>
             </button>
                         <button class="post-button save">
               <svg width="19" height="19" class="icon icon-save">
@@ -226,19 +255,23 @@ const showAllPosts = () => {
                     <!-- /.post-buttons -->
                     <div class="post-author">
                         <div class="author-about">
-                            <a href="#" class="author-username">arteislamov</a>
-                            <span class="post-time">5 минут назад</span>
+                            <a href="#" class="author-username">${author.displayName}</a>
+                            <span class="post-time">${date}</span>
                         </div>
-                        <a href="#" class="author-link"><img src="img/avatar.jpeg" alt="avatar" class="author-avatar"></a>
+                        <a href="#" class="author-link"><img src=${author.photo||"img/avatar.jpeg"} alt="avatar" class="author-avatar"></a>
                     </div>
                     <!-- /.post-author -->
                 </div>
                 <!-- /.post-footer -->
             </section>
         `;
-    })
+    });
     postsWrapper.innerHTML = postsHTML;
+    
+    addPostElem.classList.remove('visible');
+    postsWrapper.classList.add('visible');   
 };
+
 const init = () => {
     // обработчик события отправки данных формы
     loginForm.addEventListener('submit', event => {
@@ -282,6 +315,33 @@ const init = () => {
         // вешаем класс на меню, когда кликнули по кнопке меню 
         menu.classList.toggle('visible');
     });
+
+    buttonNewPost.addEventListener('click',event=>{
+        event.preventDefault();
+        showAddPost();
+    });
+
+    addPostElem.addEventListener('submit',event=>{
+        event.preventDefault();
+        console.dir(addPostElem);
+        const {title,text,tags}=addPostElem.elements;//=[...addPostElem.elements].filter(elem=>elem.tagName!=='button');//чтобы создать массив и отфильтровать без button
+        // console.log(title,text,tags);
+
+        if(title.value.length<6){
+            alert("слишком короткий заголовок")
+            return;
+        }
+        if(text.value.length<50){
+            alert("Недостаточно длинный пост")
+            return;
+        }
+
+        setPosts.addPost(title.value,text.value,tags.value,showAllPosts);
+        addPostElem.classList.remove('visible');
+        addPostElem.reset();
+
+    });
+
     showAllPosts();
     // вызываем проверку авторизованности
     toggleAuthDom();
