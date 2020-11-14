@@ -10,6 +10,7 @@
  };
  // Initialize Firebase
  firebase.initializeApp(firebaseConfig);
+ console.log(firebase)
 
  // Создаем переменную, в которую положим кнопку меню
  let menuToggle = document.querySelector('#menu-toggle');
@@ -40,30 +41,13 @@
  const postsWrapper = document.querySelector(".posts");
 
  const buttonNewPost = document.querySelector('.button-new-post'); //отеление поста
+ const sidebarNavBlock = document.querySelector('.sidebar-nav');
 
  const addPostElem = document.querySelector('.add-post');
 
  const DEFAULT_PHOTO = userAvatarElem.src;
+ const loginForget = document.querySelector('.login-forget');
 
-
- // временная база данных пользователей
- const listUsers = [{
-         id: '01',
-         email: 'maks@mail.ru',
-         password: '12345',
-         displayName: 'MaksJs',
-         mail: 'mail.ru',
-         photo: 'https://kartinkinaden.ru/uploads/posts/2019-08/1566470359_art-demonessa-53.jpg'
-     },
-     {
-         id: '02',
-         email: 'kate@mail.ru',
-         password: '123457',
-         displayName: 'KateKillMaks',
-         mail: 'mail.ru',
-         photo: 'https://kartinkinaden.ru/uploads/posts/2019-08/1566470359_art-demonessa-53.jpg'
-     }
- ];
 
  // работает с авторизацией
  const setUsers = {
@@ -128,7 +112,7 @@
          //обещание что чтото случиться
          firebase.auth().createUserWithEmailAndPassword(email, password)
              .then(data => {
-                 console.log(data); //then -- успех
+                 this.editUser(email.substring(0, email.indexOf('@')), null, handler) //then -- успех
              })
              .catch(err => {
                  const errCode = err.code;
@@ -161,12 +145,13 @@
          //      alert('Пользователь с таким email уже зареган');
          //  }
      },
-     editUser(displayName, PhotoURL, handler) {
+     editUser(displayName, photoURL, handler) {
 
          const user = firebase.auth().currentUser;
 
+
          if (displayName) {
-             if (PhotoURL) {
+             if (photoURL) {
                  user.updateProfile({
                      displayName,
                      photoURL
@@ -177,36 +162,47 @@
                  }).then(handler)
              }
          }
-         handler();
      },
-
-     // получаем конкретного пользователя по его email
-     getUser(email) {
-         return listUsers.find(item => item.email === email); //,i,arr)//элемент,индекс,сам массив
-     },
-     // let user=null;
-     // for(let i=0;i<listUsers,length;i++){
-     //   if(listUsers[i].email===email){
-     //     user=listUsers[i];
-     //   }
-     // }
-     // return user;
-     //}
-     authorizedUser(user) {
-         this.user = user;
+     sendForget(email) {
+         firebase.auth().sendPasswordResetEmail(email)
+             .then(() => {
+                 alert('Письмо отправлено')
+             })
+             .catch(err => {
+                 console.log(err);
+             })
      }
+
+     //  // получаем конкретного пользователя по его email
+     //  getUser(email) {
+     //      return listUsers.find(item => item.email === email); //,i,arr)//элемент,индекс,сам массив
+     //  },
+     //  // let user=null;
+     //  // for(let i=0;i<listUsers,length;i++){
+     //  //   if(listUsers[i].email===email){
+     //  //     user=listUsers[i];
+     //  //   }
+     //  // }
+     //  // return user;
+     //  //}
+     //  authorizedUser(user) {
+     //      this.user = user;
+     //  }
  };
+ loginForget.addEventListener('click', event => {
+     event.preventDefault();
+     setUsers.sendForget(emailInput.value);
+     emailInput.value = '';
+ })
 
  //методы чтобы добавлять посты
  const setPosts = {
      allPosts: [],
      addPost(title, text, tags, handler) {
 
-         const user = firebase.auth().currentUser;
-
 
          this.allPosts.unshift({ //Добавляет пост в начало
-             id: `postID${+new Date().toString(16)}-${user,uid}`,
+             id: `postID${+new Date().toString(16)}-${setUsers.user.uid}`,
              title,
              text,
              tags: tags.split(',').map(item => item.trim()), //map убирает, trim убирает пробелы
@@ -217,10 +213,11 @@
              date: new Date().toLocaleString(),
              like: 0,
              comments: 0,
-         });
+         })
          firebase.database().ref('post').set(this.allPosts)
              .then(() => this.getPosts(handler));
      },
+
      getPosts(handler) {
          firebase.database().ref('post').on('value', snapshot => {
              this.allPosts = snapshot.val() || [];
@@ -239,7 +236,7 @@
          loginElem.style.display = 'none';
          userElem.style.display = '';
          userNameElem.textContent = user.displayName;
-         userAvatarElem.src = user.photo || DEFAULT_PHOTO; //user.photo ? user.photo : userAvatarElem.src;
+         userAvatarElem.src = user.photoURL || DEFAULT_PHOTO; //user.photo ? user.photo : userAvatarElem.src;
          buttonNewPost.classList.add('visible');
 
 
@@ -252,6 +249,11 @@
      }
  };
 
+ // проверка email
+ const emailValidate = (email) => {
+     return regExpValidEmail.test(email)
+ }
+
  const showAddPost = () => {
      addPostElem.classList.add('visible');
      postsWrapper.classList.remove('visible');
@@ -260,7 +262,7 @@
  const showAllPosts = () => {
 
 
-         let postsHTML = '';
+         let postHTML = '';
 
          setPosts.allPosts.forEach(({ title, text, date, author, tags, like, comments }) => {
                      //дистриктуризация (ДОП)
@@ -268,7 +270,7 @@
 
 
                      //интерпаляция
-                     postsHTML += `
+                     postHTML += `
         <section class="post">
                 <div class="post-body">
                     <h2 class="post-title">${title}</h2>
@@ -318,17 +320,25 @@
             </section>
         `;
     });
-    postsWrapper.innerHTML = postsHTML;
-    
     addPostElem.classList.remove('visible');
     postsWrapper.classList.add('visible');   
+    postsWrapper.innerHTML = postHTML;
+    
+
 };
 
 const init = () => {
-    // обработчик события отправки данных формы
-    loginForm.addEventListener('submit', event => {
-        event.preventDefault();
+      // отслеживаем клик по кнопке меню и запускаем функцию 
+    menuToggle.addEventListener('click', function (event) {
+    // отменяем стандартное поведение ссылки
+    event.preventDefault();
+    // вешаем класс на меню, когда кликнули по кнопке меню 
+    menu.classList.toggle('visible');
+  })
 
+    // обработчик события отправки данных формы
+loginForm.addEventListener('submit', event => {
+     event.preventDefault();
         // const passwordValue = passwordInput.value;
         // const emailValue = emailInput.value;
 
@@ -337,11 +347,12 @@ const init = () => {
 
     });
 
-    // эобработчик нажатия на кнопку регистрации
+    // обработчик нажатия на кнопку регистрации
     loginSignup.addEventListener('click', event => {
         event.preventDefault();
         setUsers.signUp(emailInput.value, passwordInput.value, toggleAuthDom);
         loginForm.reset(); //очистка input
+          loginForm.reset();
     });
 
     exitElem.addEventListener('click', event => {
@@ -359,13 +370,6 @@ const init = () => {
         event.preventDefault();
         setUsers.editUser(editUsername.value, editPhotoURL.value, toggleAuthDom);
         editContainer.classList.remove('visible');
-    });
-    // отслеживаем клик по кнопке меню и запускаем функцию 
-    menuToggle.addEventListener('click', function(event) {
-        // отменяем стандартное поведение ссылки
-        event.preventDefault();
-        // вешаем класс на меню, когда кликнули по кнопке меню 
-        menu.classList.toggle('visible');
     });
 
     buttonNewPost.addEventListener('click',event=>{
@@ -395,8 +399,9 @@ const init = () => {
     });
 
 
+
     setUsers.initUser(toggleAuthDom);
-    set.postsHTML(showAllPosts)
+    setPosts.getPosts(showAllPosts);
     // вызываем проверку авторизованности
 }
 
